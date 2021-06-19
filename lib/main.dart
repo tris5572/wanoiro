@@ -30,11 +30,15 @@ class _WanoiroState extends State<Wanoiro> {
   ColorManager colorManager = ColorManager();
   late var viewColor = colorManager.randomColor(); // 最初の色
 
+  bool searchColorError = false; // テキストフィールドで検索した結果がエラーか否かのフラグ。
+  final fieldController = TextEditingController();
+  final fieldFocus = FocusNode();
+
   @override
   Widget build(BuildContext context) {
     // 表示する色の明るさに応じて文字色等を選択する。
-    Color color1 = Colors.black.withOpacity(0.8); //grey[700]!; // 基本的な文字の色
-    Color color2 = Colors.white.withOpacity(0.8); //grey[100]!;
+    Color color1 = Colors.black.withOpacity(0.8);
+    Color color2 = Colors.white.withOpacity(0.8);
     if (viewColor.toColor().computeLuminance() < 0.4) {
       final c = color1;
       color1 = color2;
@@ -47,6 +51,50 @@ class _WanoiroState extends State<Wanoiro> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Container(
+                child: TextField(
+                  controller: fieldController,
+                  focusNode: fieldFocus,
+                  style: TextStyle(
+                      color: searchColorError ? Colors.red : Colors.black),
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.4),
+                      hintText: '色名で検索',
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: searchColorError
+                                  ? Colors.red
+                                  : Colors.black)),
+                      enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: searchColorError
+                                  ? Colors.red
+                                  : Colors.black))),
+                  onSubmitted: (str) {
+                    // すべての文字を選択する。
+                    fieldController.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: fieldController.text.length);
+                    // フォーカスが移動しないようにする。
+                    fieldFocus.requestFocus();
+
+                    final c = colorManager.colorNamed(str);
+                    if (c != null) {
+                      setState(() {
+                        viewColor = c;
+                        searchColorError = false;
+                      });
+                    } else {
+                      setState(() {
+                        searchColorError = true;
+                      });
+                    }
+                  },
+                ),
+                width: 160,
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 24),
+              ),
               SizedBox(
                 width: 200,
                 height: 50,
