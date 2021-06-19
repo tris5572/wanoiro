@@ -43,6 +43,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
+  color_converter:
+    dependency: "direct main"
+    description:
+      name: color_converter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
   cupertino_icons:
     dependency: "direct main"
     description:
