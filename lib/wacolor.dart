@@ -5,7 +5,7 @@ import 'package:color_converter/color_converter.dart';
 import 'package:flutter/material.dart';
 
 // 表示する色のリスト。
-const COLOR_CSV = '''
+const colorCsv = '''
 桜色,さくらいろ,#fef4f4
 小豆色,あずきいろ,#96514d
 黄金,こがね,#e6b422
@@ -474,12 +474,12 @@ const COLOR_CSV = '''
 ''';
 
 class WaColor {
+  WaColor(this.kanji, this.yomi, this.colorCode);
+
   late final String kanji; // 色名の漢字表記
   late final String yomi; // 色名のひらがな表記
   late final String colorCode; // 「#rrggbb」のカラーコード。
   Color? color;
-
-  WaColor(this.kanji, this.yomi, this.colorCode);
 
   // 引数で渡された名前と同じかどうかを返す。末尾の「色」「いろ」の有無はどちらでも良い。
   bool isEqualName(String s) {
@@ -488,21 +488,21 @@ class WaColor {
     }
 
     if (kanji.substring(kanji.length - 1) == '色') {
-      if (s + '色' == kanji) {
+      if ('$s色' == kanji) {
         return true;
       }
     } else {
-      if (s == kanji + '色') {
+      if (s == '$kanji色') {
         return true;
       }
     }
 
     if (yomi.substring(yomi.length - 2) == 'いろ') {
-      if (s + 'いろ' == yomi) {
+      if ('$sいろ' == yomi) {
         return true;
       }
     } else {
-      if (s == yomi + 'いろ') {
+      if (s == '$yomiいろ') {
         return true;
       }
     }
@@ -536,28 +536,31 @@ class WaColor {
       return true;
     }
     if (other is WaColor) {
-      return this.kanji == other.kanji && this.colorCode == other.colorCode;
+      return kanji == other.kanji && colorCode == other.colorCode;
     } else {
       return false;
     }
   }
 
   @override
-  int get hashCode => this.hashCode;
+  int get hashCode => hashValues(super.hashCode, kanji, colorCode);
 }
 
 // -----------------------------------------------------------------------
 
 // 色を管理するマネージャークラス。シングルトン。
 class ColorManager {
-  static ColorManager? _instance;
-  final colorList = <WaColor>[];
+  factory ColorManager() {
+    _instance ??= ColorManager._();
+
+    return _instance!;
+  }
 
   ColorManager._() {
     // CSV形式の文字列から色の情報を読み込んで初期化する。
-    for (final line in COLOR_CSV.split('\n')) {
+    for (final line in colorCsv.split('\n')) {
       // 空行を飛ばす
-      if (line.length == 0) {
+      if (line.isEmpty) {
         continue;
       }
 
@@ -566,13 +569,8 @@ class ColorManager {
     }
   }
 
-  factory ColorManager() {
-    if (_instance == null) {
-      _instance = ColorManager._();
-    }
-
-    return _instance!;
-  }
+  static ColorManager? _instance;
+  final colorList = <WaColor>[];
 
   // ランダムな色を返す。
   WaColor randomColor() {
@@ -591,6 +589,5 @@ class ColorManager {
     return null;
   }
 
-  // ignore: todo
-  // TODO: 最も似た色を返す。
+  // やること： 最も似た色を返す。
 }
